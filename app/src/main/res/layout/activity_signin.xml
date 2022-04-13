@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:background="@color/white"
+    tools:context=".SignInActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:text="Employee App"
+        android:textColor="@color/black"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/TILname"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/TILname"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textColorHint="#B7B4B4"
+        app:boxStrokeColor="@color/teal_700"
+        app:boxStrokeWidth="2dp"
+        app:hintTextColor="@color/teal_700"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:placeholderText="Ganta Nikhil"
+        app:placeholderTextColor="#C2BFBF"
+        app:startIconDrawable="@drawable/icon_profile">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Name"
+            android:inputType="textPersonName"
+            android:textColor="@color/black"
+            android:textColorHint="#5C5B5B"
+            android:textSize="18sp"
+            android:textStyle="normal" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/TILRegNo"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_marginTop="16dp"
+        android:textColorHint="#B7B4B4"
+        app:boxStrokeColor="@color/teal_700"
+        app:boxStrokeWidth="2dp"
+        app:hintTextColor="@color/teal_700"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TILname"
+        app:placeholderText="AP31IP9872"
+        app:placeholderTextColor="#C2BFBF"
+        app:startIconDrawable="@drawable/icon_regno">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/regno"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Registration No"
+            android:inputType="textCapCharacters"
+            android:textColor="@color/black"
+            android:textColorHint="#C2BFBF"
+            android:textSize="18sp"
+            android:textStyle="normal" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/TILphone"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_marginTop="16dp"
+        android:textColorHint="#B7B4B4"
+        app:boxStrokeColor="@color/teal_700"
+        app:boxStrokeWidth="2dp"
+        app:hintTextColor="@color/teal_700"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TILRegNo"
+        app:placeholderText="1234567890"
+        app:placeholderTextColor="#C2BFBF"
+        app:startIconDrawable="@drawable/icon_phone">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Phone No."
+            android:inputType="phone"
+            android:maxLength="10"
+            android:textColor="@color/black"
+            android:textColorHint="#C2BFBF"
+            android:textSize="18sp"
+            android:textStyle="normal" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/logIn"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#292E53"
+        android:text="GET OTP"
+        android:textAllCaps="false"
+        android:textColor="#D8D4D4"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TILphone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
