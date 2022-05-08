@@ -1,6 +1,10 @@
 package com.example.employee;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -16,15 +20,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.security.acl.Permission;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
     private static final int PERMISSIONS_FINE_LOCATION = 99;
     private Chronometer chronometer;
     private long pauseOffset;
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
     FusedLocationProviderClient fusedLocationProviderClient;
     LocationRequest locationRequest;
+
+    public static final int REQUEST_CODE_LOCATION_PERMISSION=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,71 +97,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Location Code
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(30000);
-        locationRequest.setFastestInterval(5000);
-
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
         sw_gps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (sw_gps.isChecked()) {
                     text_check.setText("GPS");
-                    locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 } else {
                     text_check.setText("WiFi/Towers");
                     locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
                 }
             }
         });
-        UpdateGPS();
+
+//        UpdateGPS();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode)
+        if(requestCode==REQUEST_CODE_LOCATION_PERMISSION && grantResults.length>0)
         {
-            case PERMISSIONS_FINE_LOCATION:
-                if(grantResults[0]==PackageManager.PERMISSION_GRANTED)
-                    UpdateGPS();
-                else
-                    Toast.makeText(MainActivity.this,"App requires permissions",Toast.LENGTH_SHORT).show();
-                break;
-        }
-    }
-
-    private void UpdateGPS() {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    UpdateUIvalues(location);
-                }
-            });
-        } else {
-            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M)
+            if(grantResults[0]==PackageManager.PERMISSION_GRANTED)
             {
-                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
+                startLocationService();
             }
+            else
+                Toast.makeText(MainActivity.this,"Permissions denied",Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void UpdateUIvalues(Location location) {
-        tv_lat.setText(String.valueOf(location.getLatitude()));
-        tv_lon.setText(String.valueOf(location.getLongitude()));
-        if(location.hasSpeed())
-        {
-            tv_speed.setText(String.valueOf(location.getSpeed()));
-        }
-        else
-            tv_speed.setText("-");
-
-    }
 
     public void StartTime(View v) {
         if (!running) {
@@ -164,6 +135,15 @@ public class MainActivity extends AppCompatActivity {
             chronometer.start();
             running = true;
         }
+        if(ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE_LOCATION_PERMISSION);
+
+        }
+        else
+            startLocationService();
     }
 
     public void ResumeTime(View v) {
@@ -172,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
             chronometer.start();
             running = true;
         }
+        startLocationService();
     }
 
     public void PauseTime(View v) {
@@ -180,11 +161,53 @@ public class MainActivity extends AppCompatActivity {
             pauseOffset = SystemClock.elapsedRealtime() - chronometer.getBase();
             running = false;
         }
+        stopLocationService();
     }
 
     public void ResetTime(View v) {
         chronometer.stop();
         chronometer.setBase(SystemClock.elapsedRealtime());
         pauseOffset = 0;
+        stopLocationService();
     }
+
+    private boolean isLocationServiceRunning()
+        {
+        ActivityManager activityManager =(ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if(activityManager!=null)
+        {
+            for(ActivityManager.RunningServiceInfo serviceInfo : activityManager.getRunningServices(Integer.MAX_VALUE))
+            {
+                if(LocationService.class.getName().equals(serviceInfo.service.getClassName()))
+                {
+                    if(serviceInfo.foreground)
+                        return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    private void startLocationService(){
+        if(!isLocationServiceRunning())
+        {
+            Intent intent=new Intent(getApplicationContext(),LocationService.class);
+            intent.setAction(Constants.ACTION_START_LOCATION_SERVICE);
+            startService(intent);
+            Toast.makeText(this,"Location started",Toast.LENGTH_SHORT).show();
+
+        }
+    }
+    private void stopLocationService(){
+        if(isLocationServiceRunning())
+        {
+            Intent intent=new Intent(getApplicationContext(),LocationService.class);
+            intent.setAction(Constants.ACTION_STOP_LOCATION_SERVICE);
+            startService(intent);
+            Toast.makeText(this,"Location stopped",Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
 }
