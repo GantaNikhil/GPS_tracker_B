@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -71,6 +72,12 @@ public class SignInActivity extends AppCompatActivity {
                     phnno.requestFocus();
                     return;
                 }
+                SharedPreferences sharedPreferences=getSharedPreferences("GPSTracker",MODE_PRIVATE);
+                SharedPreferences.Editor editor=sharedPreferences.edit();
+
+                editor.putString("Phone No.",phnno.getText().toString());
+                editor.commit();
+
                 Intent intent = new Intent(SignInActivity.this, OTPActivity.class);
                 intent.putExtra("phone", phnno.getText().toString());
                 startActivity(intent);

@@ -5,11 +5,13 @@ import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
@@ -26,6 +28,20 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity  {
     private static final int PERMISSIONS_FINE_LOCATION = 99;
@@ -36,8 +52,9 @@ public class MainActivity extends AppCompatActivity  {
     SwitchCompat sw_gps;
     TextView text_check,tv_lat,tv_lon,tv_speed;
 
-    FusedLocationProviderClient fusedLocationProviderClient;
     LocationRequest locationRequest;
+    FusedLocationProviderClient fusedLocationProviderClient;
+
 
     public static final int REQUEST_CODE_LOCATION_PERMISSION=1;
 
@@ -52,7 +69,6 @@ public class MainActivity extends AppCompatActivity  {
         reset = findViewById(R.id.resetTime);
         sw_gps = findViewById(R.id.sw_gps);
         text_check = findViewById(R.id.text_check);
-
 
         tv_lat = findViewById(R.id.tv_lat);
         tv_lon = findViewById(R.id.tv_lon);
@@ -102,16 +118,17 @@ public class MainActivity extends AppCompatActivity  {
             public void onClick(View view) {
                 if (sw_gps.isChecked()) {
                     text_check.setText("GPS");
-                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+//                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 } else {
                     text_check.setText("WiFi/Towers");
-                    locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+//                    locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
                 }
             }
         });
 
 //        UpdateGPS();
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -130,11 +147,12 @@ public class MainActivity extends AppCompatActivity  {
 
 
     public void StartTime(View v) {
-        if (!running) {
+//        chronometer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
+//        if (!running) {
             chronometer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
             chronometer.start();
             running = true;
-        }
+//        }
         if(ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(MainActivity.this,
@@ -197,6 +215,8 @@ public class MainActivity extends AppCompatActivity  {
             startService(intent);
             Toast.makeText(this,"Location started",Toast.LENGTH_SHORT).show();
 
+            UpdateGPS();
+
         }
     }
     private void stopLocationService(){
@@ -208,6 +228,28 @@ public class MainActivity extends AppCompatActivity  {
             Toast.makeText(this,"Location stopped",Toast.LENGTH_SHORT).show();
 
         }
+    } private void UpdateGPS() {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    UpdateUIvalues(location);
+                }
+            });
+        }
+    }
+
+    private void UpdateUIvalues(Location location) {
+        tv_lat.setText(String.valueOf(location.getLatitude()));
+        tv_lon.setText(String.valueOf(location.getLongitude()));
+        if(location.hasSpeed())
+        {
+            tv_speed.setText(String.valueOf(location.getSpeed()));
+        }
+        else
+            tv_speed.setText("-");
+
     }
 
 }
